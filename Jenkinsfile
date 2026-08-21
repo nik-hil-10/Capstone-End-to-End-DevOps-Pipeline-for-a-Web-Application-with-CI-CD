@@ -252,31 +252,25 @@ pipeline {
         }
         success {
             echo "🎉 CI/CD Pipeline Execution SUCCEEDED! All 5 Stages Completed."
-            script {
-                try {
-                    slackSend(
-                        channel: '#devops-alerts',
-                        color: 'good',
-                        message: "✅ *Pipeline SUCCESS* - `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Environment:* ${params.ENVIRONMENT}\n*Commit:* ${env.GIT_COMMIT?.take(7) ?: 'N/A'}\n<${env.BUILD_URL}|View Build>"
-                    )
-                } catch (Exception e) {
-                    echo "Slack notification skipped: " + e.getMessage()
-                }
-            }
+            sh '''
+                SLACK_WEBHOOK=$(cat /var/jenkins_home/.slack_webhook 2>/dev/null || echo "${SLACK_WEBHOOK_URL}")
+                if [ -n "$SLACK_WEBHOOK" ]; then
+                    curl -s -X POST -H 'Content-type: application/json' \
+                        --data "{\\"text\\":\\"✅ *Pipeline SUCCESS* - \`${JOB_NAME}\` #${BUILD_NUMBER}\\n*Environment:* ${ENVIRONMENT}\\n*Commit:* ${GIT_COMMIT:0:7}\\n<http://localhost:8080/job/${JOB_NAME}/${BUILD_NUMBER}/|View Build>\\"}" \
+                        "$SLACK_WEBHOOK" || true
+                fi
+            '''
         }
         failure {
             echo "❌ CI/CD Pipeline Execution FAILED! Please inspect stage logs."
-            script {
-                try {
-                    slackSend(
-                        channel: '#devops-critical',
-                        color: 'danger',
-                        message: "🚨 *Pipeline FAILED* - `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Environment:* ${params.ENVIRONMENT}\n*Stage:* ${env.STAGE_NAME ?: 'Unknown'}\n<${env.BUILD_URL}console|View Console Logs>"
-                    )
-                } catch (Exception e) {
-                    echo "Slack notification skipped: " + e.getMessage()
-                }
-            }
+            sh '''
+                SLACK_WEBHOOK=$(cat /var/jenkins_home/.slack_webhook 2>/dev/null || echo "${SLACK_WEBHOOK_URL}")
+                if [ -n "$SLACK_WEBHOOK" ]; then
+                    curl -s -X POST -H 'Content-type: application/json' \
+                        --data "{\\"text\\":\\"🚨 *Pipeline FAILED* - \`${JOB_NAME}\` #${BUILD_NUMBER}\\n*Environment:* ${ENVIRONMENT}\\n*Stage:* Testing and Monitoring\\n<http://localhost:8080/job/${JOB_NAME}/${BUILD_NUMBER}/console|View Console Logs>\\"}" \
+                        "$SLACK_WEBHOOK" || true
+                fi
+            '''
         }
     }
 }
