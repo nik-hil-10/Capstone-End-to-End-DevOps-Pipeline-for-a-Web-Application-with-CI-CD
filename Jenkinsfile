@@ -10,11 +10,10 @@ pipeline {
     agent any
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Pipeline Triggers: Triggers automatically on code push & webhook
+    // Pipeline Triggers: Triggers ONLY on code push (Event-Driven Webhooks)
     // ─────────────────────────────────────────────────────────────────────────
     triggers {
         githubPush()
-        pollSCM('* * * * *')
     }
 
     parameters {
@@ -253,22 +252,22 @@ pipeline {
         success {
             echo "🎉 CI/CD Pipeline Execution SUCCEEDED! All 5 Stages Completed."
             sh '''
-                SLACK_WEBHOOK=$(cat /var/jenkins_home/.slack_webhook 2>/dev/null || echo "${SLACK_WEBHOOK_URL}")
+                SLACK_WEBHOOK=$(cat /var/jenkins_home/.slack_webhook 2>/dev/null || echo "")
                 if [ -n "$SLACK_WEBHOOK" ]; then
-                    curl -s -X POST -H 'Content-type: application/json' \
-                        --data "{\\"text\\":\\"✅ *Pipeline SUCCESS* - \`${JOB_NAME}\` #${BUILD_NUMBER}\\n*Environment:* ${ENVIRONMENT}\\n*Commit:* ${GIT_COMMIT:0:7}\\n<http://localhost:8080/job/${JOB_NAME}/${BUILD_NUMBER}/|View Build>\\"}" \
-                        "$SLACK_WEBHOOK" || true
+                    printf '{"text":"✅ *Pipeline SUCCESS* - `streaming-platform-pipeline` #%s\\n*Status:* All 5 Stages Passed\\n<http://localhost:8080/job/streaming-platform-pipeline/%s/|View Build>"}\n' "${BUILD_NUMBER}" "${BUILD_NUMBER}" > /tmp/slack_msg.json
+                    curl -s -X POST -H "Content-type: application/json" -d @/tmp/slack_msg.json "$SLACK_WEBHOOK" || true
+                    rm -f /tmp/slack_msg.json
                 fi
             '''
         }
         failure {
             echo "❌ CI/CD Pipeline Execution FAILED! Please inspect stage logs."
             sh '''
-                SLACK_WEBHOOK=$(cat /var/jenkins_home/.slack_webhook 2>/dev/null || echo "${SLACK_WEBHOOK_URL}")
+                SLACK_WEBHOOK=$(cat /var/jenkins_home/.slack_webhook 2>/dev/null || echo "")
                 if [ -n "$SLACK_WEBHOOK" ]; then
-                    curl -s -X POST -H 'Content-type: application/json' \
-                        --data "{\\"text\\":\\"🚨 *Pipeline FAILED* - \`${JOB_NAME}\` #${BUILD_NUMBER}\\n*Environment:* ${ENVIRONMENT}\\n*Stage:* Testing and Monitoring\\n<http://localhost:8080/job/${JOB_NAME}/${BUILD_NUMBER}/console|View Console Logs>\\"}" \
-                        "$SLACK_WEBHOOK" || true
+                    printf '{"text":"🚨 *Pipeline FAILED* - `streaming-platform-pipeline` #%s\\n*Status:* Inspect Console Logs\\n<http://localhost:8080/job/streaming-platform-pipeline/%s/console|View Console Logs>"}\n' "${BUILD_NUMBER}" "${BUILD_NUMBER}" > /tmp/slack_msg.json
+                    curl -s -X POST -H "Content-type: application/json" -d @/tmp/slack_msg.json "$SLACK_WEBHOOK" || true
+                    rm -f /tmp/slack_msg.json
                 fi
             '''
         }
