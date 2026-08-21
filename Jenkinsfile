@@ -262,19 +262,31 @@ pipeline {
         }
         success {
             echo "🎉 CI/CD Pipeline Execution SUCCEEDED! All services deployed and verified on EKS."
-            slackSend(
-                channel: '#devops-alerts',
-                color: 'good',
-                message: "✅ *Pipeline SUCCESS* - `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Environment:* ${params.ENVIRONMENT}\n*Commit:* ${env.GIT_COMMIT?.take(7) ?: 'N/A'}\n<${env.BUILD_URL}|View Build>"
-            )
+            script {
+                try {
+                    slackSend(
+                        channel: '#devops-alerts',
+                        color: 'good',
+                        message: "✅ *Pipeline SUCCESS* - `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Environment:* ${params.ENVIRONMENT}\n*Commit:* ${env.GIT_COMMIT?.take(7) ?: 'N/A'}\n<${env.BUILD_URL}|View Build>"
+                    )
+                } catch (Exception e) {
+                    echo "Slack notification skipped: " + e.getMessage()
+                }
+            }
         }
         failure {
             echo "❌ CI/CD Pipeline Execution FAILED! Please inspect stage logs above."
-            slackSend(
-                channel: '#devops-critical',
-                color: 'danger',
-                message: "🚨 *Pipeline FAILED* - `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Environment:* ${params.ENVIRONMENT}\n*Stage:* ${env.STAGE_NAME ?: 'Unknown'}\n<${env.BUILD_URL}console|View Console Logs>"
-            )
+            script {
+                try {
+                    slackSend(
+                        channel: '#devops-critical',
+                        color: 'danger',
+                        message: "🚨 *Pipeline FAILED* - `${env.JOB_NAME}` #${env.BUILD_NUMBER}\n*Environment:* ${params.ENVIRONMENT}\n*Stage:* ${env.STAGE_NAME ?: 'Unknown'}\n<${env.BUILD_URL}console|View Console Logs>"
+                    )
+                } catch (Exception e) {
+                    echo "Slack notification skipped: " + e.getMessage()
+                }
+            }
         }
     }
 }
