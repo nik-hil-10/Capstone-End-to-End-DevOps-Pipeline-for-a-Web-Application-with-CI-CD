@@ -101,9 +101,16 @@ prometheus:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
+    additionalScrapeConfigs:
+      - job_name: 'jenkins-ci'
+        metrics_path: '/prometheus'
+        scrape_interval: '30s'
+        static_configs:
+          - targets: ['host.docker.internal:8080', 'localhost:8080']
 
 nodeExporter:
   enabled: true
 
 kubeStateMetrics:
   enabled: true
+

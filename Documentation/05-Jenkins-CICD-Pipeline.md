@@ -5,35 +5,35 @@ The Jenkins CI/CD pipeline automates the entire software delivery lifecycle from
 
 ---
 
-## 2. Pipeline Stages Breakdown
+## 2. Pipeline Stages Breakdown (5 Canonical Stages)
 
 ```
-[ Stage 1: Checkout SCM ]
-       │ Pulls latest code, logs commit hash, author, and branch.
+[ Stage 1: Build Stage (Triggered on Code Push) ]
+       │ • Security scan & dependency audit (npm audit)
+       │ • Builds 5 multi-tier Docker images (build-${BUILD_NUMBER} & latest)
+       │ • Authenticates with AWS ECR and pushes container images
        ▼
-[ Stage 2: Code Quality & Security Audit ]
-       │ Runs npm audit and static syntax validation across microservices.
+[ Stage 2: Infrastructure Provisioning Stage ]
+       │ • Runs 'terraform plan' and 'terraform apply' to provision AWS VPC, EKS, and ECR
+       │ • Stores state securely in AWS S3 with DynamoDB locking
        ▼
-[ Stage 3: Infrastructure as Code (Terraform) ]
-       │ Conditional: Runs 'terraform plan' and 'terraform apply' to provision AWS VPC, EKS, and ECR.
+[ Stage 3: Configuration Management Stage ]
+       │ • Executes Ansible playbooks (setup_tools.yml, configure_jenkins_agent.yml)
+       │ • Configures EC2 instances and validates tooling idempotency
        ▼
-[ Stage 4: Configuration Management (Ansible) ]
-       │ Conditional: Executes Ansible playbooks to ensure build dependencies and tooling are current.
+[ Stage 4: Deployment Stage ]
+       │ • Injects dynamic build tags and deploys Kubernetes manifests to AWS EKS
+       │ • Configures LoadBalancers, HPA autoscaling, and zero-downtime RollingUpdates
+       │ • Enforces 'kubectl rollout status' checks
        ▼
-[ Stage 5: Build Container Images ]
-       │ Builds 5 multi-tier Docker images tagged with the build number (build-${BUILD_NUMBER}) and 'latest'.
+[ Stage 5: Testing and Monitoring Stage ]
+       │ • Runs automated post-deployment smoke test suite (tests/smoke-test.sh)
+       │ • Provisions Prometheus & Grafana monitoring stack via Helm
+       │ • Configures Alertmanager and PrometheusRule alerting
        ▼
-[ Stage 6: Push Images to Amazon ECR ]
-       │ Authenticates with AWS ECR and pushes container images to respective repositories.
-       ▼
-[ Stage 7: Deploy to Amazon EKS ]
-       │ Injects the dynamic build tag and applies Kubernetes manifests to the 'streamingapp' namespace.
-       ▼
-[ Stage 8: Verification & Health Check ]
-       │ Executes 'kubectl rollout status' for each service and asserts pods and services are healthy.
-       ▼
-[ Post-Action Cleanup ]
-       │ Prunes dangling local Docker images and logs success/failure notifications.
+[ Post-Actions: Notifications & Cleanup ]
+       │ • Sends real-time build status alerts to Slack (#devops-alerts / #devops-critical)
+       │ • Prunes dangling container artifacts
 ```
 
 ---
@@ -46,6 +46,8 @@ The Jenkins CI/CD pipeline automates the entire software delivery lifecycle from
 3.  **Docker Pipeline & Docker Plugin:** For container building.
 4.  **Kubernetes CLI Plugin:** For executing `kubectl` within pipeline stages.
 5.  **Git Plugin:** For GitHub SCM integration.
+6.  **Slack Notification Plugin:** For real-time incident alerting.
+7.  **Prometheus Metrics Plugin:** For exporting Jenkins build metrics to Prometheus.
 
 ### Setting Up AWS Credentials in Jenkins
 1.  Navigate to **Jenkins Dashboard** -> **Manage Jenkins** -> **Credentials** -> **System** -> **Global credentials**.
