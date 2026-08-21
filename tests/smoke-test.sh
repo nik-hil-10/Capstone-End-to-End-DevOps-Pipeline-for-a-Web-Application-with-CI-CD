@@ -19,6 +19,9 @@ echo "================================================================="
 # 1. Check Pod Health
 echo ""
 echo "--- [Test 1] Verifying Pod Running Status ---"
+echo "Waiting for all workload pods in namespace ${NAMESPACE} to reach Ready state..."
+kubectl wait --for=condition=Ready pods --all -n ${NAMESPACE} --timeout=60s || true
+
 POD_COUNT=$(kubectl get pods -n ${NAMESPACE} --no-headers | wc -l)
 RUNNING_COUNT=$(kubectl get pods -n ${NAMESPACE} --field-selector=status.phase=Running --no-headers | wc -l)
 
