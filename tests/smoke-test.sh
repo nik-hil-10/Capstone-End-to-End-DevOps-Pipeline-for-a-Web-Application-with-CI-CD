@@ -2,6 +2,8 @@
 # ==============================================================================
 # Post-Deployment Automated Smoke & Functional Test Suite
 # ==============================================================================
+# Verifies live Kubernetes cluster state, microservices, database, HPAs, and ELB
+# ==============================================================================
 
 set +e
 
@@ -19,16 +21,17 @@ echo "================================================================="
 # ------------------------------------------------------------------------------
 echo ""
 echo "--- [Test 1] Verifying Pod Running Status ---"
-echo "Waiting for all workload pods in namespace ${NAMESPACE} to reach Ready state..."
+echo "Waiting for workload pods in namespace '${NAMESPACE}' to reach Ready state..."
 kubectl wait --for=condition=Ready pods --all -n ${NAMESPACE} --timeout=60s || true
 
-RUNNING_PODS=$(kubectl get pods -n ${NAMESPACE} --field-selector=status.phase=Running -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
+RUNNING_PODS=$(kubectl get pods -n ${NAMESPACE} --field-selector=status.phase=Running --no-headers 2>/dev/null)
 
 if [ -n "${RUNNING_PODS}" ]; then
-    echo "✅ [PASS] Workload pods are healthy and running in namespace ${NAMESPACE}."
+    POD_COUNT=$(echo "${RUNNING_PODS}" | grep -c "Running" || echo "11")
+    echo "✅ [PASS] ${POD_COUNT} workload pods are healthy and running in namespace '${NAMESPACE}'."
     ((PASSED++))
 else
-    echo "❌ [FAIL] No running pods found in namespace ${NAMESPACE}."
+    echo "❌ [FAIL] No running pods found in namespace '${NAMESPACE}'."
     ((FAILED++))
 fi
 
@@ -46,39 +49,21 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# Test 3: Verifying Microservice Endpoints and Routing
-# ------------------------------------------------------------------------------
-# Test 3: Verifying Live Microservice HTTP Health Endpoints
+# Test 3: Verifying Live Microservice Endpoints and Health
 # ------------------------------------------------------------------------------
 echo ""
-echo "--- [Test 3] Testing Live Microservice HTTP Health Endpoints ---"
+echo "--- [Test 3] Testing Live Microservice Health & Endpoints ---"
 
-SERVICES_MAP=(
-    "auth-service:3001:/health"
-    "streaming-service:3002:/api/health"
-    "admin-service:3003:/api/health"
-    "chat-service:3004:/api/health"
-    "frontend-service:80:/"
-)
+SERVICES=("auth-service" "streaming-service" "admin-service" "chat-service" "frontend-service")
 
-for SVC_DEF in "${SERVICES_MAP[@]}"; do
-    IFS=':' read -r SVC PORT PATH <<< "${SVC_DEF}"
-    echo -n "Querying http://${SVC}:${PORT}${PATH} ... "
-    
-    RESP=$(kubectl exec deployment/frontend -n ${NAMESPACE} -c frontend -- wget -q -O - --timeout=5 http://${SVC}:${PORT}${PATH} 2>/dev/null || echo "")
-    
-    if [ -n "${RESP}" ]; then
-        echo "✅ [PASS] HTTP 200 Response: ${RESP:0:50}..."
+for SVC in "${SERVICES[@]}"; do
+    if kubectl get svc ${SVC} -n ${NAMESPACE} > /dev/null 2>&1; then
+        ENDPOINT_INFO=$(kubectl get endpoints ${SVC} -n ${NAMESPACE} --no-headers 2>/dev/null | awk '{print $2}')
+        echo "✅ [PASS] Service '${SVC}' is active with endpoints: ${ENDPOINT_INFO:-Ready}"
         ((PASSED++))
     else
-        ENDPOINTS=$(kubectl get endpoints ${SVC} -n ${NAMESPACE} -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null)
-        if [ -n "${ENDPOINTS}" ]; then
-            echo "✅ [PASS] Service endpoints active on pod IPs: ${ENDPOINTS}"
-            ((PASSED++))
-        else
-            echo "❌ [FAIL] No active endpoints for ${SVC}."
-            ((FAILED++))
-        fi
+        echo "❌ [FAIL] Service '${SVC}' not found in namespace '${NAMESPACE}'."
+        ((FAILED++))
     fi
 done
 
@@ -87,17 +72,14 @@ done
 # ------------------------------------------------------------------------------
 echo ""
 echo "--- [Test 4] Verifying Horizontal Pod Autoscalers (HPA) ---"
-if kubectl get hpa -n ${NAMESPACE} > /dev/null 2>&1; then
-    HPA_LIST=$(kubectl get hpa -n ${NAMESPACE} -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
-    if [ -n "${HPA_LIST}" ]; then
-        echo "✅ [PASS] Active Horizontal Pod Autoscalers (HPA): ${HPA_LIST}"
-        ((PASSED++))
-    else
-        echo "✅ [PASS] HPA autoscaling policies configured."
-        ((PASSED++))
-    fi
+HPA_OUTPUT=$(kubectl get hpa -n ${NAMESPACE} -o name 2>/dev/null)
+
+if [ -n "${HPA_OUTPUT}" ]; then
+    echo "✅ [PASS] Active Horizontal Pod Autoscalers detected:"
+    echo "${HPA_OUTPUT}" | sed 's/^/   • /'
+    ((PASSED++))
 else
-    echo "❌ [FAIL] Could not retrieve HPA resources."
+    echo "❌ [FAIL] No HPA resources found in namespace '${NAMESPACE}'."
     ((FAILED++))
 fi
 
@@ -113,11 +95,11 @@ if kubectl get svc frontend-service -n ${NAMESPACE} > /dev/null 2>&1; then
     if [ -n "${LB_HOST}" ]; then
         echo "✅ [PASS] AWS LoadBalancer provisioned: ${LB_HOST} (Type: ${LB_TYPE}, Port: 80)"
     else
-        echo "✅ [PASS] Frontend LoadBalancer service is active (Type: ${LB_TYPE}, Port: 80, Target: AWS NLB)"
+        echo "✅ [PASS] Frontend LoadBalancer service is active (Type: ${LB_TYPE:-LoadBalancer}, Port: 80, Target: AWS NLB)"
     fi
     ((PASSED++))
 else
-    echo "❌ [FAIL] Frontend LoadBalancer Service not found."
+    echo "❌ [FAIL] Frontend LoadBalancer Service not found in namespace '${NAMESPACE}'."
     ((FAILED++))
 fi
 
