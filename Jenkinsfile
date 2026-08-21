@@ -132,27 +132,22 @@ pipeline {
                 echo "================================================================="
                 echo " [Stage 6] Authenticating and Pushing Images to Amazon ECR"
                 echo "================================================================="
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: env.AWS_CREDENTIALS_ID
-                ]]) {
-                    sh '''
-                        AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-                        ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-                        
-                        echo "Logging into Amazon ECR registry: ${ECR_REGISTRY}..."
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                sh '''
+                    AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+                    ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                    
+                    echo "Logging into Amazon ECR registry: ${ECR_REGISTRY}..."
+                    aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
-                        SERVICES="auth-service streaming-service admin-service chat-service frontend"
-                        for SVC in $SERVICES; do
-                            echo "Pushing ${SVC} (${IMAGE_TAG})..."
-                            docker tag ${PROJECT_PREFIX}/${SVC}:${IMAGE_TAG} ${ECR_REGISTRY}/${PROJECT_PREFIX}/${SVC}:${IMAGE_TAG}
-                            docker tag ${PROJECT_PREFIX}/${SVC}:latest ${ECR_REGISTRY}/${PROJECT_PREFIX}/${SVC}:latest
-                            docker push ${ECR_REGISTRY}/${PROJECT_PREFIX}/${SVC}:${IMAGE_TAG}
-                            docker push ${ECR_REGISTRY}/${PROJECT_PREFIX}/${SVC}:latest
-                        done
-                    '''
-                }
+                    SERVICES="auth-service streaming-service admin-service chat-service frontend"
+                    for SVC in $SERVICES; do
+                        echo "Pushing ${SVC} (${IMAGE_TAG})..."
+                        docker tag ${PROJECT_PREFIX}/${SVC}:${IMAGE_TAG} ${ECR_REGISTRY}/${PROJECT_PREFIX}/${SVC}:${IMAGE_TAG}
+                        docker tag ${PROJECT_PREFIX}/${SVC}:latest ${ECR_REGISTRY}/${PROJECT_PREFIX}/${SVC}:latest
+                        docker push ${ECR_REGISTRY}/${PROJECT_PREFIX}/${SVC}:${IMAGE_TAG}
+                        docker push ${ECR_REGISTRY}/${PROJECT_PREFIX}/${SVC}:latest
+                    done
+                '''
             }
         }
 
@@ -164,32 +159,27 @@ pipeline {
                 echo "================================================================="
                 echo " [Stage 7] Deploying Microservices to Kubernetes (EKS)"
                 echo "================================================================="
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: env.AWS_CREDENTIALS_ID
-                ]]) {
-                    sh '''
-                        AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-                        ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+                sh '''
+                    AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+                    ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-                        echo "Updating local kubeconfig for EKS Cluster: ${EKS_CLUSTER_NAME}..."
-                        aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
+                    echo "Updating local kubeconfig for EKS Cluster: ${EKS_CLUSTER_NAME}..."
+                    aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}
 
-                        echo "Ensuring Namespace and Core Configs exist..."
-                        kubectl apply -f k8s/00-namespace.yaml
-                        kubectl apply -f k8s/01-configmaps-secrets.yaml
-                        kubectl apply -f k8s/02-mongodb.yaml
+                    echo "Ensuring Namespace and Core Configs exist..."
+                    kubectl apply -f k8s/00-namespace.yaml
+                    kubectl apply -f k8s/01-configmaps-secrets.yaml
+                    kubectl apply -f k8s/02-mongodb.yaml
 
-                        echo "Applying microservice deployments with image tag: ${IMAGE_TAG}..."
-                        sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/auth-service:${IMAGE_TAG}|g" k8s/03-auth-service.yaml | kubectl apply -f -
-                        sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/streaming-service:${IMAGE_TAG}|g" k8s/04-streaming-service.yaml | kubectl apply -f -
-                        sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/admin-service:${IMAGE_TAG}|g" k8s/05-admin-service.yaml | kubectl apply -f -
-                        sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/chat-service:${IMAGE_TAG}|g" k8s/06-chat-service.yaml | kubectl apply -f -
-                        sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/frontend:${IMAGE_TAG}|g" k8s/07-frontend.yaml | kubectl apply -f -
+                    echo "Applying microservice deployments with image tag: ${IMAGE_TAG}..."
+                    sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/auth-service:${IMAGE_TAG}|g" k8s/03-auth-service.yaml | kubectl apply -f -
+                    sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/streaming-service:${IMAGE_TAG}|g" k8s/04-streaming-service.yaml | kubectl apply -f -
+                    sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/admin-service:${IMAGE_TAG}|g" k8s/05-admin-service.yaml | kubectl apply -f -
+                    sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/chat-service:${IMAGE_TAG}|g" k8s/06-chat-service.yaml | kubectl apply -f -
+                    sed "s|REPLACED_BY_IMAGE_TAG|${ECR_REGISTRY}/${PROJECT_PREFIX}/frontend:${IMAGE_TAG}|g" k8s/07-frontend.yaml | kubectl apply -f -
 
-                        kubectl apply -f k8s/09-hpa.yaml
-                    '''
-                }
+                    kubectl apply -f k8s/09-hpa.yaml
+                '''
             }
         }
 
