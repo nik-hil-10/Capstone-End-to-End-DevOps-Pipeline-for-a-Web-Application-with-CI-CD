@@ -21,10 +21,38 @@
           - software-properties-common
           - git
           - jq
+          - openjdk-17-jre-headless
         state: present
 
     # =========================================================================
-    # 1. Docker Installation
+    # 1. Jenkins LTS Installation
+    # =========================================================================
+    - name: Download Jenkins official GPG Keyring
+      get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+
+    - name: Add Jenkins official APT repository
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+        state: present
+        filename: jenkins
+
+    - name: Install Jenkins LTS
+      apt:
+        name: jenkins
+        state: present
+        update_cache: yes
+
+    - name: Ensure Jenkins service is started and enabled
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    # =========================================================================
+    # 2. Docker Installation
     # =========================================================================
     - name: Add Docker official GPG key
       apt_key:
