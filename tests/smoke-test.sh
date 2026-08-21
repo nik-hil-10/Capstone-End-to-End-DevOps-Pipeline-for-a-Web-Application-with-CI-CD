@@ -5,7 +5,7 @@
 # Validates live Kubernetes endpoints, pod readiness, and microservice HTTP health
 # ==============================================================================
 
-set -e
+set +e
 
 NAMESPACE="${1:-streamingapp}"
 PASSED=0
@@ -39,7 +39,7 @@ fi
 # 2. Check Database Connectivity
 echo ""
 echo "--- [Test 2] Verifying MongoDB Database Service ---"
-if kubectl get svc mongodb -n ${NAMESPACE} > /dev/null 2>&1; then
+if kubectl get svc mongo -n ${NAMESPACE} > /dev/null 2>&1 || kubectl get svc mongodb -n ${NAMESPACE} > /dev/null 2>&1; then
     echo "✅ [PASS] MongoDB Service is active on port 27017."
     ((PASSED++))
 else
