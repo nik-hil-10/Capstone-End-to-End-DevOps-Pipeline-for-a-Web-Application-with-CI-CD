@@ -1,0 +1,43 @@
+# ==============================================================================
+# Root .gitignore for Capstone DevOps Pipeline Project
+# ==============================================================================
+
+# ─── Terraform ───────────────────────────────────────────────────────────────
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
+terraform/tfplan
+terraform/*.tfplan
+
+# ─── Ansible ─────────────────────────────────────────────────────────────────
+ansible/*.retry
+
+# ─── Environment & Secrets ───────────────────────────────────────────────────
+.env
+.env.*
+*.pem
+*.key
+
+# ─── IDE & OS ────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+Thumbs.db
+.DS_Store
+
+# ─── Node / Application ─────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+*.log
+
+# ─── LOCAL-ONLY FILES (NOT pushed to remote repo) ────────────────────────────
+# These are personal helper docs and presentation materials
+# that stay on your local machine for the capstone defense.
+presentation/
+RUN-GUIDE.md
+SCREENSHOT-TRACKER.md
+

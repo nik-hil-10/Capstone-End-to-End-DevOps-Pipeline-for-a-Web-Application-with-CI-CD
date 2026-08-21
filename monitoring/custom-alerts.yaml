@@ -1,0 +1,51 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: streamingapp-custom-alerts
+  namespace: monitoring
+  labels:
+    role: alert-rules
+    app.kubernetes.io/name: kube-prometheus-stack
+spec:
+  groups:
+    - name: StreamingAppClusterAlerts
+      rules:
+        # Alert when Pod CPU > 80% for 5 mins
+        - alert: HighPodCpuUsage
+          expr: sum(rate(container_cpu_usage_seconds_total{namespace="streamingapp", container!=""}[5m])) by (pod) / sum(kube_pod_container_resource_limits{namespace="streamingapp", resource="cpu"}) by (pod) * 100 > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage on pod {{ $labels.pod }}"
+            description: "Pod {{ $labels.pod }} in namespace streamingapp is utilizing > 80% CPU for over 5 minutes."
+
+        # Alert when Pod Memory > 85% for 5 mins
+        - alert: HighPodMemoryUsage
+          expr: sum(container_memory_working_set_bytes{namespace="streamingapp", container!=""}) by (pod) / sum(kube_pod_container_resource_limits{namespace="streamingapp", resource="memory"}) by (pod) * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High Memory usage on pod {{ $labels.pod }}"
+            description: "Pod {{ $labels.pod }} in namespace streamingapp is utilizing > 85% Memory limit."
+
+        # Alert when Pod is in CrashLoopBackOff
+        - alert: PodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace="streamingapp"}[5m]) > 3
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.pod }} is crash looping"
+            description: "Pod {{ $labels.pod }} has restarted more than 3 times in the last 5 minutes."
+
+        # Alert when an EKS Node is NotReady
+        - alert: KubernetesNodeNotReady
+          expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Kubernetes Node {{ $labels.node }} is NotReady"
+            description: "Node {{ $labels.node }} has been unready for more than 5 minutes."

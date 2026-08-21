@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: streamingapp
+  labels:
+    app.kubernetes.io/name: streamingapp
+    app.kubernetes.io/part-of: capstone-devops-platform

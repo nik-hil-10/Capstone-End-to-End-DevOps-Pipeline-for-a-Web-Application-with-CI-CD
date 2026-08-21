@@ -1,0 +1,57 @@
+---
+- name: Configure Jenkins Controller / Agent Environment
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Ensure jenkins group exists
+      group:
+        name: jenkins
+        state: present
+
+    - name: Ensure jenkins user exists with home directory
+      user:
+        name: jenkins
+        group: jenkins
+        groups: docker
+        append: yes
+        shell: /bin/bash
+        home: /var/jenkins_home
+        create_home: yes
+
+    - name: Ensure permissions on Docker socket
+      file:
+        path: /var/run/docker.sock
+        mode: '0666'
+      ignore_errors: yes
+
+    - name: Create Jenkins workspace directory
+      file:
+        path: /var/jenkins_home/workspace
+        state: directory
+        owner: jenkins
+        group: jenkins
+        mode: '0755'
+
+    - name: Create .kube directory for Jenkins user
+      file:
+        path: /var/jenkins_home/.kube
+        state: directory
+        owner: jenkins
+        group: jenkins
+        mode: '0700'
+
+    - name: Configure git global settings for jenkins user
+      become_user: jenkins
+      git_config:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        scope: global
+      loop:
+        - { name: 'user.name', value: 'Jenkins CI/CD' }
+        - { name: 'user.email', value: 'jenkins@devops-capstone.local' }
+      ignore_errors: yes
+
+    - name: Output Jenkins Agent configuration status
+      debug:
+        msg: "Jenkins environment configured successfully with Docker and Kubernetes access."
