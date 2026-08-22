@@ -27,16 +27,23 @@
     # =========================================================================
     # 1. Jenkins LTS Installation
     # =========================================================================
-    - name: Add Jenkins official apt key
-      apt_key:
-        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-        state: present
+    - name: Ensure /etc/apt/keyrings directory exists
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
 
-    - name: Add Jenkins official APT repository
-      apt_repository:
-        repo: "deb https://pkg.jenkins.io/debian-stable binary/"
-        state: present
-        update_cache: yes
+    - name: Download Jenkins official GPG key and de-armor
+      shell: |
+        curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | gpg --dearmor -o /etc/apt/keyrings/jenkins.gpg --yes
+      args:
+        creates: /etc/apt/keyrings/jenkins.gpg
+
+    - name: Add Jenkins APT repository list
+      copy:
+        dest: /etc/apt/sources.list.d/jenkins.list
+        content: "deb [signed-by=/etc/apt/keyrings/jenkins.gpg] https://pkg.jenkins.io/debian-stable binary/\n"
+        mode: '0644'
 
     - name: Install Jenkins LTS
       apt:
