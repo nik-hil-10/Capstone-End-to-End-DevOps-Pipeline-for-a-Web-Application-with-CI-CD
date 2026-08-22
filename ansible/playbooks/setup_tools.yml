@@ -116,11 +116,6 @@
         - jenkins
       ignore_errors: yes
 
-    - name: Restart Jenkins to apply docker group permissions
-      service:
-        name: jenkins
-        state: restarted
-
     # =========================================================================
     # 3. AWS CLI v2 Installation
     # =========================================================================
