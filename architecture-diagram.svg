@@ -1,0 +1,304 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#161f33" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.9" />
+    </linearGradient>
+
+    <linearGradient id="eksGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1a2f" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#0d233a" stop-opacity="0.8" />
+    </linearGradient>
+
+    <linearGradient id="accentBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 1 L 6 4 L 0 7 z" fill="#38bdf8" />
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 1 L 6 4 L 0 7 z" fill="#34d399" />
+    </marker>
+    <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 1 L 6 4 L 0 7 z" fill="#fb923c" />
+    </marker>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 1 L 6 4 L 0 7 z" fill="#c084fc" />
+    </marker>
+
+    <!-- Filters -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+    
+    <style>
+      .title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 800; fill: #ffffff; }
+      .badge { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 11px; fill: #38bdf8; letter-spacing: 1px; }
+      .heading { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 14px; fill: #f8fafc; }
+      .subheading { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 600; font-size: 12px; fill: #94a3b8; }
+      .body-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 500; font-size: 11.5px; fill: #cbd5e1; }
+      .port-tag { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600; fill: #38bdf8; }
+      .flow-label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 600; font-size: 10.5px; fill: #94a3b8; }
+    </style>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1200" height="780" rx="16" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="2" />
+
+  <!-- Grid Dots (Subtle) -->
+  <g opacity="0.15">
+    <pattern id="gridPattern" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#475569" />
+    </pattern>
+    <rect width="1200" height="780" fill="url(#gridPattern)" />
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- HEADER -->
+  <!-- ========================================================================= -->
+  <g transform="translate(40, 36)">
+    <rect width="170" height="24" rx="12" fill="#0369a1" fill-opacity="0.25" stroke="#38bdf8" stroke-width="1" />
+    <text x="85" y="16" text-anchor="middle" class="badge">AWS CLOUD TOPOLOGY</text>
+    <text x="185" y="18" class="title" font-size="20">StreamFlix Microservices Architecture &amp; DevOps Pipeline</text>
+    <text x="1120" y="18" text-anchor="end" class="subheading">AWS Region: ap-south-1 (Mumbai) • Kubernetes v1.31</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- LEFT COLUMN: PUBLIC INGRESS & CI/CD -->
+  <!-- ========================================================================= -->
+  
+  <!-- 1. Public Ingress & Edge Routing -->
+  <g transform="translate(40, 85)" filter="url(#cardShadow)">
+    <rect width="360" height="285" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
+    
+    <!-- Section Header -->
+    <rect width="360" height="36" rx="12" fill="#1e293b" />
+    <rect y="24" width="360" height="12" fill="#1e293b" />
+    <text x="18" y="23" class="heading" fill="#38bdf8">1. PUBLIC INGRESS &amp; EDGE LAYER</text>
+    <text x="342" y="23" text-anchor="end" class="badge" fill="#94a3b8">PUBLIC SUBNETS</text>
+
+    <!-- Client Traffic -->
+    <rect x="20" y="52" width="320" height="46" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1" />
+    <text x="35" y="73" class="heading" font-size="13">👥 Users &amp; Client Browsers</text>
+    <text x="35" y="88" class="body-text">HTTPS / HTTP Internet Traffic on Port 80 / 443</text>
+
+    <!-- Down Arrow -->
+    <path d="M 180 98 L 180 120" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrowBlue)" />
+
+    <!-- AWS Internet Gateway & NAT -->
+    <rect x="20" y="122" width="152" height="60" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1" />
+    <text x="30" y="145" class="heading" font-size="12">🌐 Internet Gateway</text>
+    <text x="30" y="163" class="body-text">VPC Ingress Endpoint</text>
+
+    <rect x="188" y="122" width="152" height="60" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1" />
+    <text x="198" y="145" class="heading" font-size="12">⚡ Single NAT Gateway</text>
+    <text x="198" y="163" class="body-text">Private Outbound (66% Save)</text>
+
+    <!-- Down Arrow to NLB -->
+    <path d="M 96 182 L 96 206" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrowBlue)" />
+
+    <!-- AWS Network Load Balancer -->
+    <rect x="20" y="208" width="320" height="58" rx="8" fill="#0f2744" stroke="#3b82f6" stroke-width="1.5" />
+    <text x="35" y="233" class="heading" font-size="13" fill="#60a5fa">⚖️ AWS Network Load Balancer (NLB)</text>
+    <text x="35" y="251" class="body-text">Health Checked L4 Ingress • Zero Direct Worker Node Exposure</text>
+  </g>
+
+  <!-- 2. CI/CD Pipeline & DevOps Automation -->
+  <g transform="translate(40, 390)" filter="url(#cardShadow)">
+    <rect width="360" height="350" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
+    
+    <!-- Section Header -->
+    <rect width="360" height="36" rx="12" fill="#1e293b" />
+    <rect y="24" width="360" height="12" fill="#1e293b" />
+    <text x="18" y="23" class="heading" fill="#fb923c">2. CI/CD &amp; DEVOPS AUTOMATION</text>
+    <text x="342" y="23" text-anchor="end" class="badge" fill="#fb923c">AWS EC2</text>
+
+    <!-- GitHub SCM -->
+    <rect x="20" y="52" width="320" height="48" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1" />
+    <text x="35" y="73" class="heading" font-size="13">🐙 GitHub SCM Repository</text>
+    <text x="35" y="89" class="body-text">Webhook Trigger on push to main branch</text>
+
+    <!-- Down Arrow -->
+    <path d="M 180 100 L 180 120" stroke="#fb923c" stroke-width="2" marker-end="url(#arrowOrange)" />
+
+    <!-- Jenkins Controller -->
+    <rect x="20" y="122" width="320" height="66" rx="8" fill="#1c1917" stroke="#f97316" stroke-width="1.5" />
+    <text x="35" y="145" class="heading" font-size="13" fill="#fdba74">🤖 Jenkins Controller (AWS EC2)</text>
+    <text x="35" y="163" class="body-text">5-Stage Declarative Pipeline • Automated npm audit scan</text>
+    <text x="35" y="177" class="body-text">Terraform Automation • Ansible Configuration</text>
+
+    <!-- Split Arrows -->
+    <path d="M 96 188 L 96 216" stroke="#fb923c" stroke-width="2" marker-end="url(#arrowOrange)" />
+    <path d="M 264 188 L 264 216" stroke="#fb923c" stroke-width="2" marker-end="url(#arrowOrange)" />
+
+    <!-- Artifacts & State -->
+    <rect x="20" y="218" width="152" height="68" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1" />
+    <text x="30" y="241" class="heading" font-size="12">📦 Amazon ECR</text>
+    <text x="30" y="259" class="body-text">5 Microservice Repos</text>
+    <text x="30" y="273" class="body-text">Dual Image Tagging</text>
+
+    <rect x="188" y="218" width="152" height="68" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1" />
+    <text x="198" y="241" class="heading" font-size="12">🪣 Terraform State</text>
+    <text x="198" y="259" class="body-text">AWS S3 Remote Backend</text>
+    <text x="198" y="273" class="body-text">DynamoDB Lock Table</text>
+
+    <!-- Automated Smoke Test Status -->
+    <rect x="20" y="298" width="320" height="36" rx="6" fill="#062e24" stroke="#059669" stroke-width="1" />
+    <text x="35" y="321" class="heading" font-size="11.5" fill="#34d399">✅ Automated Smoke Test Suite: 9/9 Passed (Zero-Downtime)</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- RIGHT COLUMN: AMAZON EKS CLUSTER -->
+  <!-- ========================================================================= -->
+  <g transform="translate(425, 85)" filter="url(#cardShadow)">
+    <rect width="735" height="655" rx="14" fill="url(#eksGrad)" stroke="#1e3a8a" stroke-width="2" />
+    
+    <!-- Section Header -->
+    <rect width="735" height="42" rx="14" fill="#0f2744" />
+    <rect y="28" width="735" height="14" fill="#0f2744" />
+    <text x="24" y="27" class="heading" font-size="15" fill="#38bdf8">☸️ 3. AMAZON EKS CLUSTER v1.31 (VPC PRIVATE SUBNETS: 10.0.10.0/24 &amp; 10.0.20.0/24)</text>
+    <text x="710" y="27" text-anchor="end" class="badge" fill="#34d399">ISOLATED WORKER NODES</text>
+
+    <!-- Ingress Connection Line from NLB -->
+    <!-- (Origin x: 425 - 45 = 380, y: 310 -> Target Gateway x: 450, y: 155) -->
+
+    <!-- Top API Gateway Tier -->
+    <g transform="translate(24, 58)">
+      <rect width="687" height="74" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+      <text x="20" y="28" class="heading" font-size="14" fill="#38bdf8">🖥️ Frontend Application &amp; Nginx Reverse Proxy API Gateway (2 Pods)</text>
+      <text x="20" y="48" class="body-text">React.js Single Page Application (SPA) • Internal Cluster DNS Reverse Proxy Routing • Port 80</text>
+      <text x="20" y="64" class="body-text">Zero Public Backend Port Exposure • Security Headers • CORS Whitelisted</text>
+      <rect x="585" y="14" width="85" height="22" rx="4" fill="#0284c7" fill-opacity="0.3" stroke="#38bdf8" stroke-width="1" />
+      <text x="627" y="29" text-anchor="middle" class="port-tag">PORT 80</text>
+    </g>
+
+    <!-- Connectors from Gateway to 4 Microservices -->
+    <path d="M 110 132 L 110 178" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrowBlue)" />
+    <path d="M 285 132 L 285 178" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrowBlue)" />
+    <path d="M 460 132 L 460 178" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrowBlue)" />
+    <path d="M 635 132 L 635 178" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrowBlue)" />
+
+    <!-- Route Labels -->
+    <text x="110" y="158" text-anchor="middle" class="flow-label">/api/auth</text>
+    <text x="285" y="158" text-anchor="middle" class="flow-label">/api/streaming</text>
+    <text x="460" y="158" text-anchor="middle" class="flow-label">/api/admin</text>
+    <text x="635" y="158" text-anchor="middle" class="flow-label">/api/chat</text>
+
+    <!-- Microservices Layer (Namespace: streamingapp) -->
+    <g transform="translate(24, 180)">
+      
+      <!-- 1. Auth Service -->
+      <g transform="translate(0, 0)">
+        <rect width="162" height="120" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1.5" />
+        <rect x="8" y="8" width="146" height="26" rx="4" fill="#1e293b" />
+        <text x="81" y="25" text-anchor="middle" class="heading" font-size="12">🔑 auth-service</text>
+        <text x="12" y="52" class="body-text">• User Registration</text>
+        <text x="12" y="68" class="body-text">• JWT Signing &amp; Auth</text>
+        <text x="12" y="84" class="body-text">• Bcrypt Security</text>
+        <text x="12" y="106" class="port-tag">PORT 3001</text>
+      </g>
+
+      <!-- 2. Streaming Service -->
+      <g transform="translate(175, 0)">
+        <rect width="162" height="120" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1.5" />
+        <rect x="8" y="8" width="146" height="26" rx="4" fill="#1e293b" />
+        <text x="81" y="25" text-anchor="middle" class="heading" font-size="12">🎬 streaming-svc</text>
+        <text x="12" y="52" class="body-text">• Video Catalog</text>
+        <text x="12" y="68" class="body-text">• S3 Media Streaming</text>
+        <text x="12" y="84" class="body-text">• HPA Autoscaling</text>
+        <text x="12" y="106" class="port-tag">PORT 3002</text>
+      </g>
+
+      <!-- 3. Admin Service -->
+      <g transform="translate(350, 0)">
+        <rect width="162" height="120" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1.5" />
+        <rect x="8" y="8" width="146" height="26" rx="4" fill="#1e293b" />
+        <text x="81" y="25" text-anchor="middle" class="heading" font-size="12">⚙️ admin-service</text>
+        <text x="12" y="52" class="body-text">• Asset Ingestion</text>
+        <text x="12" y="68" class="body-text">• Video Metadata</text>
+        <text x="12" y="84" class="body-text">• Signed S3 Uploads</text>
+        <text x="12" y="106" class="port-tag">PORT 3003</text>
+      </g>
+
+      <!-- 4. Chat Service -->
+      <g transform="translate(525, 0)">
+        <rect width="162" height="120" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1.5" />
+        <rect x="8" y="8" width="146" height="26" rx="4" fill="#1e293b" />
+        <text x="81" y="25" text-anchor="middle" class="heading" font-size="12">💬 chat-service</text>
+        <text x="12" y="52" class="body-text">• Live Watch Parties</text>
+        <text x="12" y="68" class="body-text">• Socket.IO Engine</text>
+        <text x="12" y="84" class="body-text">• HPA Autoscaling</text>
+        <text x="12" y="106" class="port-tag">PORT 3004</text>
+      </g>
+    </g>
+
+    <!-- Connectors to MongoDB -->
+    <path d="M 105 300 L 105 330 L 367 330 L 367 356" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowGreen)" />
+    <path d="M 280 300 L 280 330 L 367 330" stroke="#34d399" stroke-width="1.5" />
+    <path d="M 455 300 L 455 330 L 367 330" stroke="#34d399" stroke-width="1.5" />
+    <path d="M 630 300 L 630 330 L 367 330" stroke="#34d399" stroke-width="1.5" />
+    <text x="367" y="344" text-anchor="middle" class="flow-label" fill="#34d399">ClusterIP TCP :27017</text>
+
+    <!-- MongoDB Database Layer -->
+    <g transform="translate(24, 358)">
+      <rect width="687" height="76" rx="10" fill="#062e24" stroke="#10b981" stroke-width="1.5" />
+      <text x="20" y="28" class="heading" font-size="14" fill="#34d399">🗄️ MongoDB StatefulSet 6.0 Engine (EBS gp3 Persistent Storage)</text>
+      <text x="20" y="48" class="body-text">PersistentVolumeClaim (PVC) backed by AWS EBS gp3 • Multi-AZ Storage Durability • Automatic Volume Re-attachment</text>
+      <text x="20" y="64" class="body-text">Encrypted Credentials mounted via Kubernetes Secret resources (etcd encryption)</text>
+      <rect x="585" y="14" width="85" height="22" rx="4" fill="#059669" fill-opacity="0.3" stroke="#34d399" stroke-width="1" />
+      <text x="627" y="29" text-anchor="middle" class="port-tag" fill="#34d399">PORT 27017</text>
+    </g>
+
+    <!-- Observability & Telemetry Sub-tier -->
+    <g transform="translate(24, 456)">
+      <rect width="687" height="175" rx="10" fill="#1e1435" stroke="#7e22ce" stroke-width="1.5" />
+      
+      <!-- Header -->
+      <rect width="687" height="30" rx="10" fill="#2e1065" />
+      <rect y="18" width="687" height="12" fill="#2e1065" />
+      <text x="16" y="20" class="heading" font-size="12" fill="#c084fc">📊 4. OBSERVABILITY &amp; INCIDENT RESPONSE (Namespace: monitoring)</text>
+      <text x="670" y="20" text-anchor="end" class="badge" fill="#c084fc">PROMETHEUS OPERATOR</text>
+
+      <!-- Prometheus -->
+      <rect x="16" y="42" width="205" height="74" rx="6" fill="#0f172a" stroke="#581c87" stroke-width="1" />
+      <text x="26" y="62" class="heading" font-size="12" fill="#e879f9">📈 Prometheus Server</text>
+      <text x="26" y="78" class="body-text">• ServiceMonitor Discovery</text>
+      <text x="26" y="94" class="body-text">• 15s Granular Pod Scraping</text>
+      <text x="26" y="108" class="port-tag" fill="#e879f9">PORT 9090</text>
+
+      <!-- Grafana -->
+      <rect x="241" y="42" width="205" height="74" rx="6" fill="#0f172a" stroke="#581c87" stroke-width="1" />
+      <text x="251" y="62" class="heading" font-size="12" fill="#e879f9">📊 Grafana Dashboards</text>
+      <text x="251" y="78" class="body-text">• Cluster CPU / RAM Telemetry</text>
+      <text x="251" y="94" class="body-text">• Pod Health &amp; Rate Metrics</text>
+      <text x="251" y="108" class="port-tag" fill="#e879f9">PORT 3000</text>
+
+      <!-- Alertmanager -->
+      <rect x="466" y="42" width="205" height="74" rx="6" fill="#0f172a" stroke="#581c87" stroke-width="1" />
+      <text x="476" y="62" class="heading" font-size="12" fill="#e879f9">🚨 Alertmanager Engine</text>
+      <text x="476" y="78" class="body-text">• HighPodCpu &amp; CrashLoop Rules</text>
+      <text x="476" y="94" class="body-text">• Node Health Alert Routing</text>
+      <text x="476" y="108" class="port-tag" fill="#e879f9">PORT 9093</text>
+
+      <!-- Slack Banner -->
+      <rect x="16" y="126" width="655" height="36" rx="6" fill="#3f143c" stroke="#a21caf" stroke-width="1" />
+      <text x="30" y="149" class="heading" font-size="12" fill="#f472b6">💬 Slack Webhooks: Real-Time Build Cards &amp; Alerts Dispatched to #devops-alerts</text>
+    </g>
+
+  </g>
+
+  <!-- Cross-Tier Ingress Arrow (NLB to EKS Frontend) -->
+  <path d="M 360 322 L 425 178" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#arrowBlue)" />
+  <rect x="366" y="235" width="82" height="20" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1" />
+  <text x="407" y="249" text-anchor="middle" class="flow-label" fill="#38bdf8">Ingress :80</text>
+
+</svg>
