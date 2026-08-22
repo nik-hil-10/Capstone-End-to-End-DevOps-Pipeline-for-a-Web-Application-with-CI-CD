@@ -107,7 +107,7 @@ pipeline {
                     sh '''
                         terraform init -no-color
                         terraform validate -no-color
-                        terraform plan -var="environment=${params.ENVIRONMENT}" -out=tfplan -no-color
+                        terraform plan -var="environment=${ENVIRONMENT}" -out=tfplan -no-color
                         terraform apply -auto-approve tfplan
                     '''
                 }
