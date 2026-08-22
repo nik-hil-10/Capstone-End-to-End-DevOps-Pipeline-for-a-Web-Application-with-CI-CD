@@ -96,7 +96,7 @@ pipeline {
         // =====================================================================
         stage('Infrastructure Provisioning Stage') {
             when {
-                expression { return params.PROVISION_INFRASTRUCTURE == true && params.DESTROY_INFRASTRUCTURE == false }
+                expression { return params.DESTROY_INFRASTRUCTURE == false }
             }
             steps {
                 echo "================================================================="
@@ -120,7 +120,7 @@ pipeline {
         // =====================================================================
         stage('Configuration Management Stage') {
             when {
-                expression { return params.PROVISION_INFRASTRUCTURE == true && params.DESTROY_INFRASTRUCTURE == false }
+                expression { return params.DESTROY_INFRASTRUCTURE == false }
             }
             steps {
                 echo "================================================================="
