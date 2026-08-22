@@ -21,6 +21,7 @@ terraform/
 ├── security_groups.tf       # EKS cluster and node security groups
 ├── eks.tf                   # EKS Cluster, Node Group, IAM, and OIDC Provider
 ├── ecr.tf                   # ECR Repositories and lifecycle retention rules
+├── jenkins_ec2.tf           # Jenkins CI/CD Controller EC2 instance, EIP, and IAM Role
 ├── outputs.tf               # Exported resource IDs, endpoints, and commands
 └── scripts/
     ├── teardown.sh          # Fast bash teardown script
@@ -57,7 +58,7 @@ terraform validate
 ```bash
 terraform plan -out=tfplan
 ```
-*Review the resources to be created (approx. 30-35 AWS resources).*
+*Review the resources to be created (approx. 35-40 AWS resources).*
 
 ![Terraform Plan Output](../screenshots/03-terraform-plan-output.png)
 
@@ -65,7 +66,7 @@ terraform plan -out=tfplan
 ```bash
 terraform apply tfplan
 ```
-*(Provisioning typically takes 10 to 15 minutes due to AWS EKS cluster and node group creation).*
+*(Provisioning creates VPC, EKS, ECR repositories, and the dedicated Jenkins EC2 controller).*
 
 ![Terraform Apply Complete](../screenshots/04-terraform-apply-complete.png)
 
@@ -87,4 +88,6 @@ kubectl get nodes
 | `eks_cluster_name` | Name of the EKS Cluster (`streaming-eks-cluster`) |
 | `eks_cluster_endpoint`| Kubernetes API Server HTTPS endpoint |
 | `ecr_repository_urls` | Map of repository URIs for each of the 5 microservices |
+| `jenkins_public_ip` | Static Elastic IP of the Jenkins Controller EC2 instance |
+| `jenkins_url` | Web Console URL for Jenkins Server (`http://<EIP>:8080`) |
 | `configure_kubectl` | Exact command to authenticate `kubectl` with the cluster |

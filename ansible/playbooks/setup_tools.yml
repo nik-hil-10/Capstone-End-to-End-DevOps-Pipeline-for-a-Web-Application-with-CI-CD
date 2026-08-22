@@ -22,6 +22,8 @@
           - git
           - jq
           - openjdk-21-jre-headless
+          - nodejs
+          - npm
         state: present
 
     - name: Set OpenJDK 21 as default system Java
@@ -107,17 +109,21 @@
         - jenkins
       ignore_errors: yes
 
+    - name: Restart Jenkins to apply docker group permissions
+      service:
+        name: jenkins
+        state: restarted
+
     # =========================================================================
-    # 2. AWS CLI v2 Installation
+    # 3. AWS CLI v2 Installation
     # =========================================================================
-    - name: Check if AWS CLI is installed
-      command: aws --version
-      register: aws_cli_check
-      ignore_errors: yes
-      changed_when: false
+    - name: Check if AWS CLI binary exists
+      stat:
+        path: /usr/local/bin/aws
+      register: aws_cli_bin
 
     - name: Download and install AWS CLI v2
-      when: aws_cli_check.rc != 0
+      when: not aws_cli_bin.stat.exists
       block:
         - name: Download AWS CLI v2 zip
           get_url:

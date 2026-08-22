@@ -32,14 +32,11 @@ This project delivers a production-grade, enterprise-ready **DevOps CI/CD Pipeli
         │
         ▼
 [ Jenkins CI/CD Orchestrator ]
-   ├── Stage 1: Checkout SCM
-   ├── Stage 2: Code Quality & Security Audit
-   ├── Stage 3: Terraform (Provisions VPC, EKS, ECR)
-   ├── Stage 4: Ansible (Configures Host Tools & Dependencies)
-   ├── Stage 5: Docker (Builds 5 Microservice Images)
-   ├── Stage 6: Amazon ECR (Pushes Tagged Images)
-   ├── Stage 7: Kubernetes (Deploys Pods, Services, HPA to EKS)
-   └── Stage 8: Health Checks & Automated Rollout Verification
+   ├── Stage 1: Build Stage (Security audit, Docker builds & ECR Push)
+   ├── Stage 2: Infrastructure Provisioning Stage (Terraform VPC, EKS, S3 State)
+   ├── Stage 3: Configuration Management Stage (Ansible Host & Node Config)
+   ├── Stage 4: Deployment Stage (Kubernetes Manifests, HPAs, LoadBalancers)
+   └── Stage 5: Testing & Monitoring Stage (Automated Smoke Tests & Prometheus/Grafana)
         │
         ▼
 [ AWS Cloud Infrastructure (ap-south-1) ]

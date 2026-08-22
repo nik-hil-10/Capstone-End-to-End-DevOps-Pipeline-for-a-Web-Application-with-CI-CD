@@ -1,7 +1,7 @@
 # 05. End-to-End Jenkins CI/CD Pipeline
 
 ## 1. Overview
-The Jenkins CI/CD pipeline automates the entire software delivery lifecycle from code commit to production rollout on AWS EKS. It is implemented as a Declarative Pipeline in `Jenkinsfile`.
+The Jenkins CI/CD pipeline orchestrates the entire software delivery lifecycle from code commit to production rollout on AWS EKS. The Jenkins Controller runs directly on a dedicated **AWS EC2 instance (`t3.medium`)** in the VPC public subnet (`10.0.1.0/24`) with an Elastic IP and an attached IAM Instance Profile for direct, zero-credential access to Amazon EKS and Amazon ECR. It is implemented as a Declarative Pipeline in `Jenkinsfile`.
 
 ---
 
@@ -38,7 +38,13 @@ The Jenkins CI/CD pipeline automates the entire software delivery lifecycle from
 
 ---
 
-## 3. Jenkins Prerequisites & Configuration
+## 3. Jenkins AWS EC2 Deployment & Configuration
+
+### Provisioning on AWS EC2
+* **Compute:** `t3.medium` (Ubuntu 22.04 LTS) provisioned via `terraform/jenkins_ec2.tf`.
+* **Networking:** Public Subnet 1 (`10.0.1.0/24`) with dedicated AWS Elastic IP.
+* **IAM Instance Profile:** `streaming-platform-jenkins-instance-profile` granting native IAM role permissions for EKS cluster administration, ECR image push, and S3 state access.
+* **Security Group:** Inbound Port `8080` (Web UI) and Port `22` (SSH management).
 
 ### Required Jenkins Plugins
 1.  **Pipeline:** Declarative Pipeline support.
@@ -49,14 +55,10 @@ The Jenkins CI/CD pipeline automates the entire software delivery lifecycle from
 6.  **Slack Notification Plugin:** For real-time incident alerting.
 7.  **Prometheus Metrics Plugin:** For exporting Jenkins build metrics to Prometheus.
 
-### Setting Up AWS Credentials in Jenkins
+### Setting Up Credentials in Jenkins
 1.  Navigate to **Jenkins Dashboard** -> **Manage Jenkins** -> **Credentials** -> **System** -> **Global credentials**.
-2.  Click **Add Credentials**.
-3.  **Kind:** `AWS Credentials`
-4.  **ID:** `aws-capstone-credentials`
-5.  **Access Key ID:** Enter your AWS IAM Access Key.
-6.  **Secret Access Key:** Enter your AWS IAM Secret Key.
-7.  Click **Create**.
+2.  **AWS Credentials (ID: `aws-capstone-credentials`):** Optional if using IAM Instance Profile; enter Access Key and Secret Key if using IAM user.
+3.  **Slack Webhook Secret Text (ID: `slack-token`):** Enter your Slack Incoming Webhook URL to enable real-time Slack notifications.
 
 ---
 

@@ -251,25 +251,27 @@ pipeline {
         }
         success {
             echo "🎉 CI/CD Pipeline Execution SUCCEEDED! All 5 Stages Completed."
-            sh '''
-                SLACK_WEBHOOK=$(cat /var/jenkins_home/.slack_webhook 2>/dev/null || echo "")
-                if [ -n "$SLACK_WEBHOOK" ]; then
-                    printf '{"text":"✅ *Pipeline SUCCESS* - `streaming-platform-pipeline` #%s\\n*Status:* All 5 Stages Passed\\n<http://localhost:8080/job/streaming-platform-pipeline/%s/|View Build>"}\n' "${BUILD_NUMBER}" "${BUILD_NUMBER}" > /tmp/slack_msg.json
-                    curl -s -X POST -H "Content-type: application/json" -d @/tmp/slack_msg.json "$SLACK_WEBHOOK" || true
-                    rm -f /tmp/slack_msg.json
-                fi
-            '''
+            withCredentials([string(credentialsId: 'slack-token', variable: 'SLACK_WEBHOOK')]) {
+                sh '''
+                    if [ -n "$SLACK_WEBHOOK" ]; then
+                        printf '{"text":"✅ *Pipeline SUCCESS* - `streaming-platform-pipeline` #%s\\n*Status:* All 5 Stages Passed\\n<http://13.207.80.105:8080/job/streaming-platform-pipeline/%s/|View Build>"}\n' "${BUILD_NUMBER}" "${BUILD_NUMBER}" > /tmp/slack_msg.json
+                        curl -s -X POST -H "Content-type: application/json" -d @/tmp/slack_msg.json "$SLACK_WEBHOOK" || true
+                        rm -f /tmp/slack_msg.json
+                    fi
+                '''
+            }
         }
         failure {
             echo "❌ CI/CD Pipeline Execution FAILED! Please inspect stage logs."
-            sh '''
-                SLACK_WEBHOOK=$(cat /var/jenkins_home/.slack_webhook 2>/dev/null || echo "")
-                if [ -n "$SLACK_WEBHOOK" ]; then
-                    printf '{"text":"🚨 *Pipeline FAILED* - `streaming-platform-pipeline` #%s\\n*Status:* Inspect Console Logs\\n<http://localhost:8080/job/streaming-platform-pipeline/%s/console|View Console Logs>"}\n' "${BUILD_NUMBER}" "${BUILD_NUMBER}" > /tmp/slack_msg.json
-                    curl -s -X POST -H "Content-type: application/json" -d @/tmp/slack_msg.json "$SLACK_WEBHOOK" || true
-                    rm -f /tmp/slack_msg.json
-                fi
-            '''
+            withCredentials([string(credentialsId: 'slack-token', variable: 'SLACK_WEBHOOK')]) {
+                sh '''
+                    if [ -n "$SLACK_WEBHOOK" ]; then
+                        printf '{"text":"🚨 *Pipeline FAILED* - `streaming-platform-pipeline` #%s\\n*Status:* Inspect Console Logs\\n<http://13.207.80.105:8080/job/streaming-platform-pipeline/%s/console|View Console Logs>"}\n' "${BUILD_NUMBER}" "${BUILD_NUMBER}" > /tmp/slack_msg.json
+                        curl -s -X POST -H "Content-type: application/json" -d @/tmp/slack_msg.json "$SLACK_WEBHOOK" || true
+                        rm -f /tmp/slack_msg.json
+                    fi
+                '''
+            }
         }
     }
 }

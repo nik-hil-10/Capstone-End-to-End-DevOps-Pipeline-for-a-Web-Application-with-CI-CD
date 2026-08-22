@@ -48,3 +48,14 @@ output "configure_kubectl" {
   description = "CLI Command to update local kubeconfig"
   value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${aws_eks_cluster.main.name}"
 }
+
+output "jenkins_public_ip" {
+  description = "Public Elastic IP of the Jenkins Controller on AWS EC2"
+  value       = aws_eip.jenkins_eip.public_ip
+}
+
+output "jenkins_url" {
+  description = "Web Console URL for Jenkins Server on AWS EC2"
+  value       = "http://${aws_eip.jenkins_eip.public_ip}:8080"
+}
+
