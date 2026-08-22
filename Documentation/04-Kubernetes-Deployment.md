@@ -75,3 +75,5 @@ kubectl get hpa -n streamingapp
 ![Horizontal Pod Autoscalers](../screenshots/18-kubectl-get-hpa.png)
 
 ![StreamingApp in Browser](../screenshots/19-app-frontend-browser.png)
+
+![Kubernetes Rollout Status](../screenshots/20-kubectl-rollout-status.png)

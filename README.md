@@ -24,30 +24,80 @@ This project delivers a production-grade, enterprise-ready **DevOps CI/CD Pipeli
 
 ## 🏗️ Architecture Diagram
 
+```mermaid
+graph TD
+    subgraph Developer_Workspace["Developer & SCM"]
+        DEV["Developer"] -->|git push| GH["GitHub Repository"]
+        GH -->|Webhook Trigger| JNK["Jenkins CI/CD (AWS EC2)"]
+    end
+
+    subgraph Jenkins_Pipeline["Jenkins 5-Stage Declarative Pipeline"]
+        JNK --> S1["Stage 1: Build & Security Audit<br/>(Docker Build + AWS ECR Push)"]
+        S1 --> S2["Stage 2: Infrastructure Provisioning<br/>(Terraform + S3 State Lock)"]
+        S2 --> S3["Stage 3: Configuration Management<br/>(Ansible Playbooks & Idempotency)"]
+        S3 --> S4["Stage 4: Kubernetes Deployment<br/>(EKS RollingUpdate + HPA)"]
+        S4 --> S5["Stage 5: Testing & Observability<br/>(Smoke Tests + Prometheus & Grafana)"]
+        S5 --> SLK["Slack Alerts (#devops-alerts)"]
+    end
+
+    subgraph AWS_Cloud["AWS Cloud Infrastructure (ap-south-1)"]
+        subgraph VPC["Custom VPC (10.0.0.0/16)"]
+            subgraph Public_Subnets["Public Subnets"]
+                IGW["Internet Gateway"]
+                NAT["Single Shared NAT Gateway"]
+                ELB["AWS LoadBalancer (Port 80)"]
+            end
+
+            subgraph Private_Subnets["Private Subnets (AWS EKS Worker Nodes)"]
+                subgraph App_Namespace["Namespace: streamingapp"]
+                    AUTH["auth-service (2 Pods)"]
+                    STREAM["streaming-service (2 Pods + HPA)"]
+                    ADMIN["admin-service (2 Pods)"]
+                    CHAT["chat-service (2 Pods + HPA)"]
+                    FRONT["frontend UI (2 Pods + HPA)"]
+                    MONGO[("MongoDB (EBS gp3 PVC)")]
+                end
+
+                subgraph Mon_Namespace["Namespace: monitoring"]
+                    PROM["Prometheus Server"]
+                    GRAF["Grafana Dashboards"]
+                    AM["Alertmanager"]
+                end
+            end
+        end
+
+        ECR["Amazon ECR Registry<br/>(5 Microservice Repositories)"]
+        S3["AWS S3 Remote State Bucket"]
+    end
+
+    ELB --> FRONT
+    FRONT --> AUTH
+    FRONT --> STREAM
+    FRONT --> ADMIN
+    FRONT --> CHAT
+    AUTH --> MONGO
+    STREAM --> MONGO
+    ADMIN --> MONGO
+    CHAT --> MONGO
+    PROM -->|Scrapes Metrics| App_Namespace
+    AM -->|Dispatches Webhook| SLK
 ```
-[ Developer / Git Push ]
-        │
-        ▼
-[ GitHub Repository Webhook ]
-        │
-        ▼
-[ Jenkins CI/CD Orchestrator ]
-   ├── Stage 1: Build Stage (Security audit, Docker builds & ECR Push)
-   ├── Stage 2: Infrastructure Provisioning Stage (Terraform VPC, EKS, S3 State)
-   ├── Stage 3: Configuration Management Stage (Ansible Host & Node Config)
-   ├── Stage 4: Deployment Stage (Kubernetes Manifests, HPAs, LoadBalancers)
-   └── Stage 5: Testing & Monitoring Stage (Automated Smoke Tests & Prometheus/Grafana)
-        │
-        ▼
-[ AWS Cloud Infrastructure (ap-south-1) ]
- ┌──────────────────────────────────────────────────────────────┐
- │ VPC (10.0.0.0/16)                                            │
- │  ├── Public Subnets: Internet Gateway, NAT Gateway, NLB/ALB  │
- │  └── Private Subnets: AWS EKS Cluster (2x t3.medium nodes)   │
- │       ├── Namespace 'streamingapp': 5 Microservices + Mongo  │
- │       └── Namespace 'monitoring': Prometheus + Grafana       │
- └──────────────────────────────────────────────────────────────┘
-```
+
+---
+
+## 📚 Complete Engineering Documentation Directory
+
+| Document Guide | Stage / Topic | Description |
+| :--- | :--- | :--- |
+| 📄 **[00. Project Charter & Requirements](Documentation/00-Capstone-Project-Charter-and-Requirements.md)** | Overview & Rubric | Evaluation criteria, sprint milestones, and business deliverables. |
+| 📄 **[01. System Architecture & Design](Documentation/01-Architecture-Design.md)** | Architecture | Microservices breakdown, VPC networking, security groups, and cloud diagrams. |
+| 📄 **[02. Terraform Infrastructure as Code](Documentation/02-Terraform-IaC-Guide.md)** | Stage 2: Infra | S3 remote state backend, DynamoDB locking, VPC, EKS, ECR, and IAM provisioning. |
+| 📄 **[03. Ansible Configuration Management](Documentation/03-Ansible-Configuration.md)** | Stage 3: Config | Playbooks for host dependencies, Docker CE, kubectl, Helm, and idempotency. |
+| 📄 **[04. Kubernetes Deployment Guide](Documentation/04-Kubernetes-Deployment.md)** | Stage 4: Deploy | Manifests, zero-downtime RollingUpdates, HPA autoscaling, and EBS PVC datastore. |
+| 📄 **[05. Jenkins CI/CD Pipeline](Documentation/05-Jenkins-CICD-Pipeline.md)** | CI/CD Pipeline | 5-stage declarative pipeline on AWS EC2, GitHub webhooks, and ECR integration. |
+| 📄 **[06. Monitoring & Alerting Guide](Documentation/06-Monitoring-and-Alerting.md)** | Stage 5: Testing | Prometheus Operator, Grafana dashboards, custom alert rules, and Slack routing. |
+| 📄 **[07. Cost Optimization & Teardown](Documentation/07-Cost-Optimization-and-Teardown.md)** | FinOps & Teardown | Resource cost breakdown, single NAT architecture, and one-click destruction. |
+| 📄 **[08. Troubleshooting & FAQ Guide](Documentation/08-Troubleshooting-Guide.md)** | Operations | Root-cause analysis and remediation steps for common DevOps failure modes. |
 
 ---
 

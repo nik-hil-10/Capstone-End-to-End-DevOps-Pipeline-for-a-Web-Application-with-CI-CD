@@ -59,11 +59,15 @@ kubectl port-forward -n monitoring svc/prometheus-stack-grafana 3000:80
 
 ### Monitoring Evidence
 
+![Grafana Web Console Login](../screenshots/21-grafana-login.png)
+
 ![Grafana Cluster Dashboard](../screenshots/22-grafana-cluster-dashboard.png)
 
 ![Grafana Pod Metrics](../screenshots/23-grafana-pod-metrics.png)
 
 ![Prometheus Targets](../screenshots/24-prometheus-targets.png)
+
+![Alertmanager Routing & Slack Alerts](../screenshots/25-alertmanager-config.png)
 
 ---
 

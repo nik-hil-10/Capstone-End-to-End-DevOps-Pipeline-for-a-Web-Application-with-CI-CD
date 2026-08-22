@@ -58,3 +58,13 @@ chmod +x teardown.sh
 2. Check the box for **`DESTROY_INFRASTRUCTURE` = true**.
 3. Click **Build**.
 4. The pipeline will automatically clean up Kubernetes services and execute `terraform destroy -auto-approve`.
+
+---
+
+## 5. Teardown & Cost Optimization Evidence
+
+### Automated Terraform Destruction Execution Plan
+![Terraform Teardown Execution Plan](../screenshots/26-terraform-destroy-output.png)
+
+### AWS Infrastructure Deletion & Billing Verification
+![AWS Console Teardown & Billing Verification](../screenshots/27-aws-console-empty.png)

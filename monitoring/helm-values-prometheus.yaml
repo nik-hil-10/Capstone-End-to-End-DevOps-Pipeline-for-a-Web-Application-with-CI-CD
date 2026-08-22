@@ -68,10 +68,10 @@ grafana:
   resources:
     requests:
       cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 250m
       memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
@@ -97,16 +97,11 @@ prometheus:
         memory: 256Mi
       limits:
         cpu: 500m
-        memory: 512Mi
+        memory: 1Gi
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
-    additionalScrapeConfigs:
-      - job_name: 'jenkins-ci'
-        metrics_path: '/prometheus'
-        scrape_interval: '30s'
-        static_configs:
-          - targets: ['host.docker.internal:8080', 'localhost:8080']
+    additionalScrapeConfigs: []
 
 nodeExporter:
   enabled: true

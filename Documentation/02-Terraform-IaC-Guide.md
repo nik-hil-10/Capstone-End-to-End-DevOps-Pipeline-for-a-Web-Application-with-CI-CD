@@ -37,7 +37,10 @@ Ensure your AWS CLI is authenticated with an IAM user or role with Administrator
 ```bash
 aws configure
 # Enter AWS Access Key ID, Secret Access Key, Region (e.g. ap-south-1), and Output format (json)
+aws sts get-caller-identity
 ```
+
+![AWS IAM Caller Identity](../screenshots/01-aws-iam-user-credentials.png)
 
 ### Step 2: Initialize Terraform Working Directory
 Navigate to the `terraform/` folder and download required provider plugins:

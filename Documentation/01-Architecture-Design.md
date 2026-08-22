@@ -15,51 +15,63 @@ The infrastructure and operational lifecycle are 100% automated using industry-s
 
 ## 2. High-Level Architecture Diagram
 
-```
-[ Developer / Git Push ]
-        │
-        ▼
-[ GitHub Repository Webhook ]
-        │
-        ▼
-[ Jenkins CI/CD Orchestrator (EC2 / Local) ]
-   ├── Stage 1: Checkout SCM
-   ├── Stage 2: Code Quality & Security Audit
-   ├── Stage 3: Terraform (Provisions VPC, EKS, ECR)
-   ├── Stage 4: Ansible (Configures Host Tools & Dependencies)
-   ├── Stage 5: Docker (Builds 5 Microservice Images)
-   ├── Stage 6: Amazon ECR (Pushes Tagged Images)
-   ├── Stage 7: Kubernetes (Deploys Pods, Services, HPA to EKS)
-   └── Stage 8: Health Checks & Automated Rollout Verification
-        │
-        ▼
-[ AWS Cloud Infrastructure (ap-south-1) ]
- ┌──────────────────────────────────────────────────────────────┐
- │ VPC (10.0.0.0/16)                                            │
- │                                                              │
- │  ┌── Public Subnets (AZ-1a / AZ-1b) ──────────────────────┐  │
- │  │ • Internet Gateway (IGW)                               │  │
- │  │ • Single NAT Gateway (Cost-Optimized)                  │  │
- │  │ • AWS Network / Application Load Balancer              │  │
- │  └────────────────────────────────────────────────────────┘  │
- │                                                              │
- │  ┌── Private Subnets (AZ-1a / AZ-1b) ─────────────────────┐  │
- │  │ AWS EKS Cluster (Managed Node Group: 2x t3.medium)     │  │
- │  │                                                        │  │
- │  │  Namespace: streamingapp                               │  │
- │  │  ├── Pod: auth-service (Replicas: 2)                   │  │
- │  │  ├── Pod: streaming-service (Replicas: 2 + HPA)        │  │
- │  │  ├── Pod: admin-service (Replicas: 2)                  │  │
- │  │  ├── Pod: chat-service (Replicas: 2 + HPA)             │  │
- │  │  ├── Pod: frontend (Replicas: 2 + HPA)                 │  │
- │  │  └── Pod: mongo (StatefulSet + EBS gp3 PVC)            │  │
- │  │                                                        │  │
- │  │  Namespace: monitoring                                 │  │
- │  │  ├── Prometheus Server                                 │  │
- │  │  ├── Grafana Dashboard (Port 3000)                     │  │
- │  │  └── Alertmanager (Slack Notifications)                │  │
- │  └────────────────────────────────────────────────────────┘  │
- └──────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph Developer_Workspace["Developer & SCM"]
+        DEV["Developer"] -->|git push| GH["GitHub Repository"]
+        GH -->|Webhook Trigger| JNK["Jenkins CI/CD (AWS EC2)"]
+    end
+
+    subgraph Jenkins_Pipeline["Jenkins 5-Stage Declarative Pipeline"]
+        JNK --> S1["Stage 1: Build & Security Audit<br/>(Docker Build + AWS ECR Push)"]
+        S1 --> S2["Stage 2: Infrastructure Provisioning<br/>(Terraform + S3 State Lock)"]
+        S2 --> S3["Stage 3: Configuration Management<br/>(Ansible Playbooks & Idempotency)"]
+        S3 --> S4["Stage 4: Kubernetes Deployment<br/>(EKS RollingUpdate + HPA)"]
+        S4 --> S5["Stage 5: Testing & Observability<br/>(Smoke Tests + Prometheus & Grafana)"]
+        S5 --> SLK["Slack Alerts (#devops-alerts)"]
+    end
+
+    subgraph AWS_Cloud["AWS Cloud Infrastructure (ap-south-1)"]
+        subgraph VPC["Custom VPC (10.0.0.0/16)"]
+            subgraph Public_Subnets["Public Subnets"]
+                IGW["Internet Gateway"]
+                NAT["Single Shared NAT Gateway"]
+                ELB["AWS LoadBalancer (Port 80)"]
+            end
+
+            subgraph Private_Subnets["Private Subnets (AWS EKS Worker Nodes)"]
+                subgraph App_Namespace["Namespace: streamingapp"]
+                    AUTH["auth-service (2 Pods)"]
+                    STREAM["streaming-service (2 Pods + HPA)"]
+                    ADMIN["admin-service (2 Pods)"]
+                    CHAT["chat-service (2 Pods + HPA)"]
+                    FRONT["frontend UI (2 Pods + HPA)"]
+                    MONGO[("MongoDB (EBS gp3 PVC)")]
+                end
+
+                subgraph Mon_Namespace["Namespace: monitoring"]
+                    PROM["Prometheus Server"]
+                    GRAF["Grafana Dashboards"]
+                    AM["Alertmanager"]
+                end
+            end
+        end
+
+        ECR["Amazon ECR Registry<br/>(5 Microservice Repositories)"]
+        S3["AWS S3 Remote State Bucket"]
+    end
+
+    ELB --> FRONT
+    FRONT --> AUTH
+    FRONT --> STREAM
+    FRONT --> ADMIN
+    FRONT --> CHAT
+    AUTH --> MONGO
+    STREAM --> MONGO
+    ADMIN --> MONGO
+    CHAT --> MONGO
+    PROM -->|Scrapes Metrics| App_Namespace
+    AM -->|Dispatches Webhook| SLK
 ```
 
 ---
@@ -87,3 +99,25 @@ The application is decomposed into five autonomous services communicating over i
 4.  **Least Privilege Security Groups:**
     *   `eks-cluster-sg`: Restricts control plane communication strictly to authenticated worker node interfaces.
     *   `eks-nodes-sg`: Restricts inter-pod traffic to internal VPC CIDRs and required application ports.
+
+---
+
+## 5. Architecture & Provisioning Evidence
+
+### AWS VPC & Subnet Networking
+![AWS VPC Console](../screenshots/05-aws-vpc-console.png)
+
+### AWS EKS Cluster Provisioning
+![AWS EKS Cluster Console](../screenshots/06-aws-eks-cluster-console.png)
+
+### Amazon ECR Container Repositories
+![Amazon ECR Repositories](../screenshots/07-aws-ecr-repositories.png)
+
+### Kubernetes Worker Node Readiness
+![Kubectl Get Nodes](../screenshots/08-kubectl-get-nodes.png)
+
+### Microservice Containerization (Docker Build)
+![Docker Compose Up](../screenshots/09-docker-compose-up.png)
+
+### Local & Remote Docker Container Images
+![Docker Images List](../screenshots/10-docker-images-list.png)

@@ -77,4 +77,23 @@ The Jenkins CI/CD pipeline orchestrates the entire software delivery lifecycle f
 2.  **Payload URL:** `http://<JENKINS_HOST>:8080/github-webhook/`
 3.  **Content type:** `application/json`
 4.  **Events:** Select *Just the push event*.
-5.  Click **Add webhook**. Any git push will now automatically trigger a full build and deployment!
+5. Click **Add webhook**. Any git push will now automatically trigger a full build and deployment!
+
+---
+
+## 6. CI/CD Pipeline Execution Evidence
+
+### Jenkins Pipeline Dashboard & Job Status
+![Jenkins Dashboard](../screenshots/11-jenkins-dashboard.png)
+
+### Jenkins Global Credentials Configuration
+![Jenkins Credentials Configuration](../screenshots/12-jenkins-credentials-config.png)
+
+### 5-Stage Canonical Pipeline Execution
+![Jenkins 5-Stage Pipeline Execution](../screenshots/13-jenkins-pipeline-stages.png)
+
+### Automated Test Execution & Build Success
+![Jenkins Build Console Output & Test Verification](../screenshots/14-jenkins-build-console-output.png)
+
+### Amazon ECR Container Image Push Logs
+![Amazon ECR Image Push Logs](../screenshots/15-jenkins-ecr-push-log.png)
