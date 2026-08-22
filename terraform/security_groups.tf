@@ -76,3 +76,15 @@ resource "aws_security_group_rule" "cluster_ingress_node_https" {
   security_group_id        = aws_security_group.eks_cluster.id
   source_security_group_id = aws_security_group.eks_nodes.id
 }
+
+# Allow Jenkins Controller to reach the EKS Cluster control plane API server
+resource "aws_security_group_rule" "cluster_ingress_jenkins_https" {
+  description              = "Allow Jenkins CI/CD controller to communicate with the cluster API Server"
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.eks_cluster.id
+  source_security_group_id = aws_security_group.jenkins_sg.id
+}
+

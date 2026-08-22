@@ -45,6 +45,11 @@ resource "aws_eks_cluster" "main" {
     endpoint_private_access = true
   }
 
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
+
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   depends_on = [
@@ -139,3 +144,21 @@ resource "aws_iam_openid_connect_provider" "eks" {
     Name = "${var.project_name}-eks-oidc"
   }
 }
+
+# EKS Access Entry and Cluster Admin Policy for Jenkins CI/CD Controller
+resource "aws_eks_access_entry" "jenkins_controller" {
+  cluster_name  = aws_eks_cluster.main.name
+  principal_arn = aws_iam_role.jenkins_role.arn
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "jenkins_controller_admin" {
+  cluster_name  = aws_eks_cluster.main.name
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  principal_arn = aws_iam_role.jenkins_role.arn
+
+  access_scope {
+    type = "cluster"
+  }
+}
+
