@@ -24,6 +24,17 @@
           - openjdk-21-jre-headless
         state: present
 
+    - name: Set OpenJDK 21 as default system Java
+      alternatives:
+        name: java
+        path: /usr/lib/jvm/java-21-openjdk-amd64/bin/java
+        link: /usr/bin/java
+
+    - name: Remove legacy OpenJDK 17 if present
+      apt:
+        name: openjdk-17-jre-headless
+        state: absent
+
     # =========================================================================
     # 1. Jenkins LTS Installation
     # =========================================================================
