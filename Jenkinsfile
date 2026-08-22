@@ -54,6 +54,15 @@ pipeline {
                 echo " [Stage 1] Build Stage: Building Docker Images & Pushing to AWS ECR"
                 echo " Tag: ${IMAGE_TAG} | Commit: ${env.GIT_COMMIT?.take(7) ?: 'Manual'}"
                 echo "================================================================="
+                withCredentials([string(credentialsId: 'slack-token', variable: 'SLACK_WEBHOOK')]) {
+                    sh '''
+                        if [ -n "$SLACK_WEBHOOK" ]; then
+                            printf '{"text":"🚀 *Pipeline STARTED* - `streaming-platform-pipeline` #%s\\n*Event:* Build Triggered\\n<http://13.207.80.105:8080/job/streaming-platform-pipeline/%s/console|View Live Console>"}\n' "${BUILD_NUMBER}" "${BUILD_NUMBER}" > /tmp/slack_start.json
+                            curl -s -X POST -H "Content-type: application/json" -d @/tmp/slack_start.json "$SLACK_WEBHOOK" || true
+                            rm -f /tmp/slack_start.json
+                        fi
+                    '''
+                }
                 dir('StreamingApp') {
                     sh '''
                         echo "=== 1.1 Static Analysis & Dependency Vulnerability Audits ==="
