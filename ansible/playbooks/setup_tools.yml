@@ -35,10 +35,10 @@
 
     - name: Download Jenkins official GPG key and register in APT keyring
       shell: |
-        gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 7198F4B714ABFC68
+        rm -f /etc/apt/trusted.gpg.d/jenkins.gpg /etc/apt/keyrings/jenkins.gpg
+        gpg --keyserver keyserver.ubuntu.com --recv-keys 7198F4B714ABFC68
         gpg --export 7198F4B714ABFC68 > /etc/apt/trusted.gpg.d/jenkins.gpg
-      args:
-        creates: /etc/apt/trusted.gpg.d/jenkins.gpg
+        curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | gpg --dearmor >> /etc/apt/trusted.gpg.d/jenkins.gpg
 
     - name: Add Jenkins APT repository list
       copy:
