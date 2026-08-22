@@ -37,6 +37,13 @@
         name: openjdk-17-jre-headless
         state: absent
 
+    - name: Ensure jenkins user has passwordless sudo access
+      copy:
+        dest: /etc/sudoers.d/jenkins
+        content: "jenkins ALL=(ALL) NOPASSWD: ALL\n"
+        mode: '0440'
+        validate: 'visudo -cf %s'
+
     # =========================================================================
     # 1. Jenkins LTS Installation
     # =========================================================================
