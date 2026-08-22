@@ -18,7 +18,7 @@ pipeline {
 
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['production', 'staging', 'dev'], description: 'Target Deployment Environment')
-        booleanParam(name: 'PROVISION_INFRASTRUCTURE', defaultValue: false, description: 'Run Stage 2 (Terraform) & Stage 3 (Ansible)')
+        booleanParam(name: 'PROVISION_INFRASTRUCTURE', defaultValue: true, description: 'Run Stage 2 (Terraform) & Stage 3 (Ansible)')
         booleanParam(name: 'SETUP_MONITORING', defaultValue: true, description: 'Deploy/Update Prometheus & Grafana Monitoring in Stage 5')
         booleanParam(name: 'DESTROY_INFRASTRUCTURE', defaultValue: false, description: 'DANGER: Destroy all AWS cloud infrastructure')
     }
