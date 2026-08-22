@@ -9,15 +9,11 @@
         name: jenkins
         state: present
 
-    - name: Ensure jenkins user exists with home directory
+    - name: Ensure jenkins user is member of docker group
       user:
         name: jenkins
-        group: jenkins
         groups: docker
         append: yes
-        shell: /bin/bash
-        home: /var/jenkins_home
-        create_home: yes
 
     - name: Ensure permissions on Docker socket
       file:
@@ -27,7 +23,7 @@
 
     - name: Create Jenkins workspace directory
       file:
-        path: /var/jenkins_home/workspace
+        path: /var/lib/jenkins/workspace
         state: directory
         owner: jenkins
         group: jenkins
@@ -35,7 +31,7 @@
 
     - name: Create .kube directory for Jenkins user
       file:
-        path: /var/jenkins_home/.kube
+        path: /var/lib/jenkins/.kube
         state: directory
         owner: jenkins
         group: jenkins
