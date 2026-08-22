@@ -91,14 +91,33 @@ The application is decomposed into five autonomous services communicating over i
 
 ---
 
-## 4. Network Security & Subnet Design
+## 4. Multi-Layer Enterprise Security Architecture
 
-1.  **VPC Isolation:** A custom Virtual Private Cloud (`10.0.0.0/16`) spans two Availability Zones (`ap-south-1a`, `ap-south-1b`) for high availability.
-2.  **Public Subnets (`10.0.1.0/24`, `10.0.2.0/24`):** Only internet-facing load balancers and the outbound NAT Gateway reside here.
-3.  **Private Subnets (`10.0.10.0/24`, `10.0.20.0/24`):** EKS worker nodes and application workloads are isolated with zero direct public IP assignment. Outbound internet traffic (for pulling dependencies/patches) routes through the NAT Gateway.
-4.  **Least Privilege Security Groups:**
-    *   `eks-cluster-sg`: Restricts control plane communication strictly to authenticated worker node interfaces.
-    *   `eks-nodes-sg`: Restricts inter-pod traffic to internal VPC CIDRs and required application ports.
+Security is implemented following defense-in-depth principles across 5 distinct operational layers:
+
+### 4.1 Network Isolation & Subnet Segregation
+* **Isolated Private Subnets (`10.0.10.0/24`, `10.0.20.0/24`):** All AWS EKS worker nodes, microservice pods, and MongoDB database storage are located entirely within private subnets with **zero direct public IP assignments**.
+* **Public Subnet Demarcation (`10.0.1.0/24`, `10.0.2.0/24`):** Only public ingress endpoints (AWS Network LoadBalancer) and egress routers (Single NAT Gateway) reside in public subnets.
+* **Least-Privilege Security Groups:**
+  * `eks-cluster-sg`: Restricts control-plane traffic exclusively to authorized worker node security groups.
+  * `eks-nodes-sg`: Restricts inter-pod and container traffic strictly to internal VPC CIDR blocks (`10.0.0.0/16`) and required microservice ports.
+
+### 4.2 Zero-Trust Identity & Access Management (IAM)
+* **IAM Instance Profiles & STS Tokens:** EKS worker nodes and the Jenkins CI/CD controller authenticate to AWS services (ECR, S3, CloudWatch) using **AWS IAM Instance Profiles** (`streaming-platform-jenkins-instance-profile`) that issue temporary, auto-rotating STS tokens.
+* **Zero Hardcoded Credentials:** No static AWS Access Keys (`AKIA...`) or passwords are committed to Git repositories or baked into Docker container images.
+
+### 4.3 Ingress Protection & Nginx Reverse Proxy API Gateway
+* **Internal Cluster Routing:** The React frontend container embeds an **Nginx reverse proxy** that routes API calls (`/api/auth/`, `/api/streaming/`, `/api/admin/`, `/api/chat/`) internally over Kubernetes DNS (`http://auth-service:3001`, etc.).
+* **Zero Public Port Exposure:** Microservices (`:3001`, `:3002`, `:3003`, `:3004`) and MongoDB (`:27017`) remain private ClusterIP services, completely invisible to the public internet.
+
+### 4.4 Kubernetes Workload Security
+* **Encrypted Secrets Management:** Sensitive configuration items (MongoDB URIs, JWT signing keys) are stored in Kubernetes `Secret` resources encrypted in `etcd`.
+* **Resource Limits & DoS Prevention:** Every container specifies explicit CPU and memory `requests` and `limits`, preventing "noisy-neighbor" resource starvation or denial-of-service conditions.
+* **Namespace Isolation:** Workloads run inside dedicated, isolated Kubernetes namespaces (`streamingapp` and `monitoring`).
+
+### 4.5 Pipeline DevSecOps & Automated Vulnerability Audits
+* **Static Security Auditing:** Stage 1 of the Jenkins Declarative Pipeline executes automated vulnerability scans (`npm audit --audit-level=critical`) across all microservices before Docker image construction.
+* **Immutable Container Tagging:** Docker images pushed to Amazon ECR are dual-tagged with immutable build numbers (`build-${BUILD_NUMBER}`) to guarantee artifact provenance and tamper prevention.
 
 ---
 
